@@ -42,3 +42,6 @@ yarn-error.*
 
 # secrets (Supabase keys etc.)
 .env
+
+# local editor/tool settings
+.claude/
