@@ -58,7 +58,7 @@ export function TodayScreen({
           <Text style={styles.ringLabel}>{Math.round(progress * 100)}%</Text>
         </View>
         <View style={styles.progressBody}>
-          <Text style={styles.progressTitle}>Today's Progress</Text>
+          <Text style={styles.progressTitle}>{"Today's Progress"}</Text>
           <Text style={styles.progressSubtitle}>
             {completed} of {total} completed
           </Text>
