@@ -42,5 +42,9 @@ const styles = StyleSheet.create({
   },
   inner: {
     gap: spacing.xl,
+    // Full width on phones; on tablets and wide windows the content stays readable and centred.
+    width: '100%',
+    maxWidth: 600,
+    alignSelf: 'center',
   },
 });
