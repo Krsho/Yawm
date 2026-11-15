@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fontSize, spacing } from '../theme';
+import { fontSize, spacing } from '../constants/theme';
+import { useTheme } from '../hooks/use-theme';
 
 interface SectionHeaderProps {
   title: string;
@@ -13,16 +14,18 @@ interface SectionHeaderProps {
 }
 
 export function SectionHeader({ title, accessory, actionLabel, onAction }: SectionHeaderProps) {
+  const theme = useTheme();
+
   return (
     <View style={styles.row}>
       <View style={styles.titleRow}>
-        <Text style={styles.title}>{title}</Text>
+        <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
         {accessory}
       </View>
       {actionLabel && (
         <Pressable onPress={onAction} hitSlop={8} style={styles.action}>
-          <Text style={styles.actionLabel}>{actionLabel}</Text>
-          <Ionicons name="chevron-forward" size={14} color={colors.textMuted} />
+          <Text style={[styles.actionLabel, { color: theme.textMuted }]}>{actionLabel}</Text>
+          <Ionicons name="chevron-forward" size={14} color={theme.textMuted} />
         </Pressable>
       )}
     </View>
@@ -44,7 +47,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: fontSize.title,
     fontWeight: '700',
-    color: colors.text,
   },
   action: {
     flexDirection: 'row',
@@ -53,6 +55,5 @@ const styles = StyleSheet.create({
   },
   actionLabel: {
     fontSize: fontSize.small,
-    color: colors.textMuted,
   },
 });

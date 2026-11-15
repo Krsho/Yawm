@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, View } from 'react-native';
 
-import { colors } from '../theme';
+import { useTheme } from '../hooks/use-theme';
 
 interface CheckboxProps {
   checked: boolean;
@@ -12,6 +12,8 @@ interface CheckboxProps {
 
 /** Visual-only checkbox. Toggling practices is added together with app state. */
 export function Checkbox({ checked, shape = 'square', size = 22 }: CheckboxProps) {
+  const theme = useTheme();
+
   return (
     <View
       style={[
@@ -21,10 +23,13 @@ export function Checkbox({ checked, shape = 'square', size = 22 }: CheckboxProps
           height: size,
           borderRadius: shape === 'round' ? size / 2 : 6,
         },
-        checked && styles.checked,
+        {
+          borderColor: checked ? theme.primary : theme.textFaint,
+          backgroundColor: checked ? theme.primary : theme.surface,
+        },
       ]}
     >
-      {checked && <Ionicons name="checkmark" size={size * 0.68} color={colors.white} />}
+      {checked && <Ionicons name="checkmark" size={size * 0.68} color={theme.onPrimary} />}
     </View>
   );
 }
@@ -32,13 +37,7 @@ export function Checkbox({ checked, shape = 'square', size = 22 }: CheckboxProps
 const styles = StyleSheet.create({
   box: {
     borderWidth: 1.5,
-    borderColor: colors.textFaint,
-    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  checked: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
   },
 });

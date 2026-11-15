@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, fontSize, radius, spacing } from '../theme';
+import { fontSize, radius, spacing } from '../constants/theme';
+import { useTheme } from '../hooks/use-theme';
 import { PracticeType } from '../types';
 
 interface BadgeProps {
@@ -9,9 +10,14 @@ interface BadgeProps {
 }
 
 export function Badge({ label, tone = 'green' }: BadgeProps) {
+  const theme = useTheme();
+  const isBeige = tone === 'beige';
+  const backgroundColor = isBeige ? theme.highlight : theme.primarySoft;
+  const color = isBeige ? theme.accent : theme.primary;
+
   return (
-    <View style={[styles.badge, tone === 'beige' && styles.beige]}>
-      <Text style={[styles.label, tone === 'beige' && styles.beigeLabel]}>{label}</Text>
+    <View style={[styles.badge, { backgroundColor }]}>
+      <Text style={[styles.label, { color }]}>{label}</Text>
     </View>
   );
 }
@@ -28,20 +34,12 @@ export function PracticeTypeBadge({ type }: { type: PracticeType }) {
 const styles = StyleSheet.create({
   badge: {
     alignSelf: 'flex-start',
-    backgroundColor: colors.primarySoft,
     borderRadius: radius.pill,
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
   },
-  beige: {
-    backgroundColor: colors.beige,
-  },
   label: {
     fontSize: fontSize.caption - 1,
     fontWeight: '600',
-    color: colors.primary,
-  },
-  beigeLabel: {
-    color: colors.gold,
   },
 });

@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { ComponentProps } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
-import { colors, fontSize, radius, spacing } from '../theme';
+import { fontSize, radius, spacing } from '../constants/theme';
+import { useTheme } from '../hooks/use-theme';
 
 interface ButtonProps {
   label: string;
@@ -12,15 +13,18 @@ interface ButtonProps {
 }
 
 export function Button({ label, variant = 'primary', icon, onPress }: ButtonProps) {
+  const theme = useTheme();
   const isPrimary = variant === 'primary';
-  const textColor = isPrimary ? colors.white : colors.primary;
+  const textColor = isPrimary ? theme.onPrimary : theme.primary;
 
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
-        isPrimary ? styles.primary : styles.outline,
+        isPrimary
+          ? { backgroundColor: theme.primary }
+          : [styles.outline, { backgroundColor: theme.surface, borderColor: theme.primary }],
         pressed && styles.pressed,
       ]}
     >
@@ -41,13 +45,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     borderRadius: radius.md,
   },
-  primary: {
-    backgroundColor: colors.primary,
-  },
   outline: {
-    backgroundColor: colors.surface,
     borderWidth: 1.5,
-    borderColor: colors.primary,
   },
   pressed: {
     opacity: 0.8,

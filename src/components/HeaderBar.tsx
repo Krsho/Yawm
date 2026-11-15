@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fontSize, spacing } from '../theme';
+import { fontSize, spacing } from '../constants/theme';
+import { useTheme } from '../hooks/use-theme';
 
 interface HeaderBarProps {
   title: string;
@@ -11,12 +12,14 @@ interface HeaderBarProps {
 
 /** Top bar for secondary screens: a back (or close) button and a title. */
 export function HeaderBar({ title, icon = 'back', onPress }: HeaderBarProps) {
+  const theme = useTheme();
+
   return (
     <View style={styles.bar}>
       <Pressable onPress={onPress} hitSlop={10} style={styles.button}>
-        <Ionicons name={icon === 'back' ? 'arrow-back' : 'close'} size={24} color={colors.text} />
+        <Ionicons name={icon === 'back' ? 'arrow-back' : 'close'} size={24} color={theme.text} />
       </Pressable>
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
       {/* Spacer with the button's width keeps the title centred. */}
       <View style={styles.button} />
     </View>
@@ -38,6 +41,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: fontSize.title,
     fontWeight: '600',
-    color: colors.text,
   },
 });

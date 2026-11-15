@@ -1,7 +1,8 @@
 import { ReactNode } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 
-import { colors, radius, shadow, spacing } from '../theme';
+import { radius, shadow, spacing } from '../constants/theme';
+import { useTheme } from '../hooks/use-theme';
 
 interface CardProps {
   children: ReactNode;
@@ -11,20 +12,30 @@ interface CardProps {
 }
 
 export function Card({ children, style, tone = 'white' }: CardProps) {
-  return <View style={[styles.card, tone === 'beige' && styles.beige, style]}>{children}</View>;
+  const theme = useTheme();
+  const isBeige = tone === 'beige';
+
+  return (
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: isBeige ? theme.highlight : theme.surface,
+          borderColor: isBeige ? theme.highlightBorder : theme.border,
+        },
+        style,
+      ]}
+    >
+      {children}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
     padding: spacing.lg,
     ...shadow,
-  },
-  beige: {
-    backgroundColor: colors.beige,
-    borderColor: colors.beigeBorder,
   },
 });

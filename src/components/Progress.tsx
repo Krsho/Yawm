@@ -1,7 +1,8 @@
 import { StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
-import { colors, radius } from '../theme';
+import { radius } from '../constants/theme';
+import { useTheme } from '../hooks/use-theme';
 
 interface ProgressProps {
   /** Value between 0 and 1. */
@@ -9,9 +10,17 @@ interface ProgressProps {
 }
 
 export function ProgressBar({ value }: ProgressProps) {
+  const theme = useTheme();
+
   return (
-    <View style={styles.track}>
-      <View style={[styles.fill, { width: `${Math.round(value * 100)}%` }]} />
+    <View style={[styles.track, { backgroundColor: theme.primarySoft }]}>
+      <View
+        style={[
+          styles.fill,
+          { backgroundColor: theme.primary },
+          { width: `${Math.round(value * 100)}%` },
+        ]}
+      />
     </View>
   );
 }
@@ -23,6 +32,7 @@ interface ProgressRingProps extends ProgressProps {
 
 /** Circular progress drawn with two SVG circles: a grey track and a green arc. */
 export function ProgressRing({ value, size = 52, strokeWidth = 6 }: ProgressRingProps) {
+  const theme = useTheme();
   const r = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * r;
 
@@ -32,7 +42,7 @@ export function ProgressRing({ value, size = 52, strokeWidth = 6 }: ProgressRing
         cx={size / 2}
         cy={size / 2}
         r={r}
-        stroke={colors.primarySoft}
+        stroke={theme.primarySoft}
         strokeWidth={strokeWidth}
         fill="none"
       />
@@ -40,7 +50,7 @@ export function ProgressRing({ value, size = 52, strokeWidth = 6 }: ProgressRing
         cx={size / 2}
         cy={size / 2}
         r={r}
-        stroke={colors.primary}
+        stroke={theme.primary}
         strokeWidth={strokeWidth}
         fill="none"
         strokeLinecap="round"
@@ -57,12 +67,10 @@ const styles = StyleSheet.create({
   track: {
     height: 6,
     borderRadius: radius.pill,
-    backgroundColor: colors.primarySoft,
     overflow: 'hidden',
   },
   fill: {
     height: '100%',
     borderRadius: radius.pill,
-    backgroundColor: colors.primary,
   },
 });

@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { BottomTabBar, TabName } from './src/components/BottomTabBar';
 import { practices } from './src/data/mockData';
+import { useTheme } from './src/hooks/use-theme';
 import { AddPracticeScreen } from './src/screens/AddPracticeScreen';
 import { HistoryScreen } from './src/screens/HistoryScreen';
 import { KnowledgeScreen } from './src/screens/KnowledgeScreen';
@@ -12,7 +13,6 @@ import { PracticeDetailsScreen } from './src/screens/PracticeDetailsScreen';
 import { PracticesScreen } from './src/screens/PracticesScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 import { TodayScreen } from './src/screens/TodayScreen';
-import { colors } from './src/theme';
 
 // Screens that open on top of a tab (not part of the bottom tab bar).
 type Overlay =
@@ -28,6 +28,7 @@ type Overlay =
 export default function App() {
   const [tab, setTab] = useState<TabName>('today');
   const [overlay, setOverlay] = useState<Overlay>(null);
+  const theme = useTheme();
 
   const goToTab = (next: TabName) => {
     setOverlay(null);
@@ -86,11 +87,11 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={styles.content}>{overlay ? renderOverlay() : renderTab()}</View>
         <BottomTabBar active={tab} onSelect={goToTab} />
       </View>
-      <StatusBar style="dark" />
+      <StatusBar style="auto" />
     </SafeAreaProvider>
   );
 }
@@ -98,7 +99,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   content: {
     flex: 1,

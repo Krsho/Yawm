@@ -35,7 +35,7 @@ export const colors = {
     accent: '#D8B57C',
     text: '#ECF0ED',
     textMuted: '#A7B1AB',
-    textFaint: '#7A867F',
+    textFaint: '#7E8A83',
     border: '#2B3631',
     thumb: '#FFFFFF',
   },

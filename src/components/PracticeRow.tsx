@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fontSize, spacing } from '../theme';
+import { fontSize, spacing } from '../constants/theme';
+import { useTheme } from '../hooks/use-theme';
 import { Practice } from '../types';
 import { practiceMeta } from '../utils/practice';
 import { PracticeTypeBadge } from './Badge';
@@ -20,21 +21,27 @@ export function PracticeRow({
   showDivider = false,
   onPress,
 }: PracticeRowProps) {
+  const theme = useTheme();
   const isDashboard = variant === 'dashboard';
+  // Completed practices are greyed out in lists, but not on the dashboard.
+  const nameColor = practice.completed && !isDashboard ? theme.textMuted : theme.text;
 
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.row, showDivider && styles.divider, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.row,
+        { borderBottomColor: theme.border },
+        showDivider && styles.divider,
+        pressed && styles.pressed,
+      ]}
     >
       <Checkbox checked={practice.completed} shape={isDashboard ? 'round' : 'square'} />
       <View style={styles.body}>
-        <Text style={[styles.name, practice.completed && !isDashboard && styles.nameDone]}>
-          {practice.name}
-        </Text>
+        <Text style={[styles.name, { color: nameColor }]}>{practice.name}</Text>
         {isDashboard && <PracticeTypeBadge type={practice.type} />}
       </View>
-      <Text style={styles.meta}>{practiceMeta(practice)}</Text>
+      <Text style={[styles.meta, { color: theme.textMuted }]}>{practiceMeta(practice)}</Text>
     </Pressable>
   );
 }
@@ -48,7 +55,6 @@ const styles = StyleSheet.create({
   },
   divider: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
   },
   pressed: {
     opacity: 0.6,
@@ -60,14 +66,9 @@ const styles = StyleSheet.create({
   name: {
     fontSize: fontSize.body,
     fontWeight: '500',
-    color: colors.text,
-  },
-  nameDone: {
-    color: colors.textMuted,
   },
   meta: {
     fontSize: fontSize.small,
-    color: colors.textMuted,
     fontVariant: ['tabular-nums'],
   },
 });

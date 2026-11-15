@@ -3,7 +3,8 @@ import { ComponentProps } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, fontSize, spacing } from '../theme';
+import { fontSize, spacing } from '../constants/theme';
+import { useTheme } from '../hooks/use-theme';
 
 export type TabName = 'today' | 'practices' | 'knowledge' | 'history';
 
@@ -27,12 +28,19 @@ interface BottomTabBarProps {
  */
 export function BottomTabBar({ active, onSelect }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
 
   return (
-    <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
+    <View
+      style={[
+        styles.bar,
+        { backgroundColor: theme.surface, borderTopColor: theme.border },
+        { paddingBottom: Math.max(insets.bottom, spacing.md) },
+      ]}
+    >
       {TABS.map((tab) => {
         const isActive = tab.name === active;
-        const color = isActive ? colors.primary : colors.textFaint;
+        const color = isActive ? theme.primary : theme.textFaint;
         return (
           <Pressable key={tab.name} style={styles.tab} onPress={() => onSelect(tab.name)}>
             <Ionicons name={isActive ? tab.activeIcon : tab.icon} size={23} color={color} />
@@ -49,9 +57,7 @@ export function BottomTabBar({ active, onSelect }: BottomTabBarProps) {
 const styles = StyleSheet.create({
   bar: {
     flexDirection: 'row',
-    backgroundColor: colors.surface,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
     paddingTop: spacing.sm,
   },
   tab: {
