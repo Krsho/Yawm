@@ -6,6 +6,7 @@ import { Card } from '../components/Card';
 import { PracticeRow } from '../components/PracticeRow';
 import { SectionHeader } from '../components/SectionHeader';
 import { Screen } from '../components/Screen';
+import { SummaryRow } from '../components/SummaryRow';
 import { fontSize, radius, spacing } from '../constants/theme';
 import { practices } from '../data/mockData';
 import { useTheme } from '../hooks/use-theme';
@@ -61,6 +62,8 @@ export function PracticesScreen({ onOpenPractice, onAddPractice }: PracticesScre
           <Ionicons name="add" size={26} color={theme.onPrimary} />
         </Pressable>
       </View>
+
+      <SummaryRow practices={practices} />
 
       {/* Filter chips are static for now; "All" is shown as selected. */}
       <View style={styles.filters}>
