@@ -7,8 +7,9 @@ import { Card } from '../components/Card';
 import { HeaderBar } from '../components/HeaderBar';
 import { Screen } from '../components/Screen';
 import { Toggle } from '../components/Toggle';
+import { fontSize, radius, spacing } from '../constants/theme';
 import { mockUser, routineSettings } from '../data/mockData';
-import { colors, fontSize, radius, spacing } from '../theme';
+import { useTheme } from '../hooks/use-theme';
 import { RoutineSetting } from '../types';
 
 const ROUTINE_ICONS: Record<RoutineSetting['icon'], ComponentProps<typeof MaterialCommunityIcons>['name']> = {
@@ -25,18 +26,23 @@ interface SettingsScreenProps {
 }
 
 export function SettingsScreen({ onBack, onManagePractices }: SettingsScreenProps) {
+  const theme = useTheme();
+  const iconBoxColor = { backgroundColor: theme.primarySoft };
+
   return (
     <Screen header={<HeaderBar title="Settings & Routine" onPress={onBack} />}>
       <View>
-        <Text style={styles.sectionTitle}>My Daily Routine</Text>
-        <Text style={styles.sectionHint}>Choose which practices appear in your daily checklist.</Text>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>My Daily Routine</Text>
+        <Text style={[styles.sectionHint, { color: theme.textMuted }]}>
+          Choose which practices appear in your daily checklist.
+        </Text>
         <Card style={styles.listCard}>
           {routineSettings.map((setting, index) => (
             <Row key={setting.id} divider={index < routineSettings.length - 1}>
-              <View style={styles.iconBox}>
-                <MaterialCommunityIcons name={ROUTINE_ICONS[setting.icon]} size={18} color={colors.primary} />
+              <View style={[styles.iconBox, iconBoxColor]}>
+                <MaterialCommunityIcons name={ROUTINE_ICONS[setting.icon]} size={18} color={theme.primary} />
               </View>
-              <Text style={styles.rowLabel}>{setting.label}</Text>
+              <Text style={[styles.rowLabel, { color: theme.text }]}>{setting.label}</Text>
               <Toggle value={setting.enabled} />
             </Row>
           ))}
@@ -47,64 +53,68 @@ export function SettingsScreen({ onBack, onManagePractices }: SettingsScreenProp
       </View>
 
       <View>
-        <Text style={styles.sectionTitle}>Reminders</Text>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>Reminders</Text>
         <Card style={styles.listCard}>
           <Row divider>
-            <Text style={styles.rowLabel}>Enable Reminders</Text>
+            <Text style={[styles.rowLabel, { color: theme.text }]}>Enable Reminders</Text>
             <Toggle value />
           </Row>
           <Row>
-            <Text style={styles.rowLabel}>Reminder Time</Text>
-            <View style={styles.timePill}>
-              <Text style={styles.timeText}>8:00 AM</Text>
-              <Ionicons name="time-outline" size={16} color={colors.textMuted} />
+            <Text style={[styles.rowLabel, { color: theme.text }]}>Reminder Time</Text>
+            <View style={[styles.timePill, { borderColor: theme.border }]}>
+              <Text style={[styles.timeText, { color: theme.text }]}>8:00 AM</Text>
+              <Ionicons name="time-outline" size={16} color={theme.textMuted} />
             </View>
           </Row>
         </Card>
       </View>
 
       <View>
-        <Text style={styles.sectionTitle}>Account</Text>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>Account</Text>
         <Card style={styles.listCard}>
           <Row divider>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarLetter}>{mockUser.name[0]}</Text>
+            <View style={[styles.avatar, { backgroundColor: theme.primary }]}>
+              <Text style={[styles.avatarLetter, { color: theme.onPrimary }]}>{mockUser.name[0]}</Text>
             </View>
             <View style={styles.accountText}>
-              <Text style={styles.rowLabel}>{mockUser.email}</Text>
-              <Text style={styles.accountHint}>Email address</Text>
+              <Text style={[styles.rowLabel, { color: theme.text }]}>{mockUser.email}</Text>
+              <Text style={[styles.accountHint, { color: theme.textMuted }]}>Email address</Text>
             </View>
-            <Ionicons name="chevron-forward" size={16} color={colors.textFaint} />
+            <Ionicons name="chevron-forward" size={16} color={theme.textFaint} />
           </Row>
           <Row>
-            <View style={styles.iconBox}>
-              <Ionicons name="log-out-outline" size={18} color={colors.primary} />
+            <View style={[styles.iconBox, iconBoxColor]}>
+              <Ionicons name="log-out-outline" size={18} color={theme.primary} />
             </View>
-            <Text style={styles.rowLabel}>Sign Out</Text>
-            <Ionicons name="chevron-forward" size={16} color={colors.textFaint} />
+            <Text style={[styles.rowLabel, { color: theme.text }]}>Sign Out</Text>
+            <Ionicons name="chevron-forward" size={16} color={theme.textFaint} />
           </Row>
         </Card>
       </View>
 
-      <Text style={styles.version}>Yawm v1.0.0</Text>
+      <Text style={[styles.version, { color: theme.textFaint }]}>Yawm v1.0.0</Text>
     </Screen>
   );
 }
 
 function Row({ children, divider }: { children: ReactNode; divider?: boolean }) {
-  return <View style={[styles.row, divider && styles.divider]}>{children}</View>;
+  const theme = useTheme();
+
+  return (
+    <View style={[styles.row, { borderBottomColor: theme.border }, divider && styles.divider]}>
+      {children}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: fontSize.title,
     fontWeight: '700',
-    color: colors.text,
     marginBottom: spacing.xs,
   },
   sectionHint: {
     fontSize: fontSize.small,
-    color: colors.textMuted,
     marginBottom: spacing.md,
   },
   listCard: {
@@ -119,20 +129,17 @@ const styles = StyleSheet.create({
   },
   divider: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
   },
   iconBox: {
     width: 34,
     height: 34,
     borderRadius: radius.sm,
-    backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
   rowLabel: {
     flex: 1,
     fontSize: fontSize.body,
-    color: colors.text,
   },
   buttonRow: {
     flexDirection: 'row',
@@ -146,35 +153,29 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border,
   },
   timeText: {
     fontSize: fontSize.small,
-    color: colors.text,
   },
   avatar: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarLetter: {
     fontSize: fontSize.title,
     fontWeight: '700',
-    color: colors.white,
   },
   accountText: {
     flex: 1,
   },
   accountHint: {
     fontSize: fontSize.caption,
-    color: colors.textMuted,
   },
   version: {
     textAlign: 'center',
     fontSize: fontSize.caption,
-    color: colors.textFaint,
   },
 });

@@ -8,7 +8,8 @@ import { Card } from '../components/Card';
 import { HeaderBar } from '../components/HeaderBar';
 import { ProgressBar } from '../components/Progress';
 import { Screen } from '../components/Screen';
-import { colors, fontSize, radius, spacing } from '../theme';
+import { fontSize, radius, spacing } from '../constants/theme';
+import { useTheme } from '../hooks/use-theme';
 import { Practice, PracticeCategory } from '../types';
 import { formatLongDate } from '../utils/date';
 import { practiceMeta } from '../utils/practice';
@@ -27,63 +28,73 @@ interface PracticeDetailsScreenProps {
 }
 
 export function PracticeDetailsScreen({ practice, onBack, onEdit }: PracticeDetailsScreenProps) {
-  const isCount = practice.tracking === 'count' && practice.target;
+  const theme = useTheme();
+  // Must be a real boolean: with a target of 0, "&& practice.target" would render a bare 0 and crash.
+  const isCount = practice.tracking === 'count' && (practice.target ?? 0) > 0;
+  const inputColors = { borderColor: theme.border, backgroundColor: theme.surface };
 
   return (
     <Screen header={<HeaderBar title="Practice Details" onPress={onBack} />}>
-      <Card style={styles.hero}>
+      <Card
+        style={[styles.hero, { backgroundColor: theme.primarySoft, borderColor: theme.primarySoft }]}
+      >
         <View style={styles.heroTop}>
-          <View style={styles.iconCircle}>
+          <View style={[styles.iconCircle, { backgroundColor: theme.surface }]}>
             <MaterialCommunityIcons
               name={CATEGORY_ICONS[practice.category]}
               size={30}
-              color={colors.primary}
+              color={theme.primary}
             />
           </View>
           <View style={styles.heroText}>
-            <Text style={styles.name}>{practice.name}</Text>
+            <Text style={[styles.name, { color: theme.text }]}>{practice.name}</Text>
             <PracticeTypeBadge type={practice.type} />
           </View>
         </View>
 
-        <Text style={styles.description}>{practice.description}</Text>
+        <Text style={[styles.description, { color: theme.textMuted }]}>{practice.description}</Text>
 
         {isCount && (
           <View style={styles.countBlock}>
             <View style={styles.countRow}>
-              <Text style={styles.countLabel}>Progress</Text>
-              <Text style={styles.countValue}>{practiceMeta(practice)}</Text>
+              <Text style={[styles.countLabel, { color: theme.textMuted }]}>Progress</Text>
+              <Text style={[styles.countValue, { color: theme.primary }]}>{practiceMeta(practice)}</Text>
             </View>
             <ProgressBar value={practice.progress / (practice.target ?? 1)} />
           </View>
         )}
 
-        <View style={[styles.status, !practice.completed && styles.statusPending]}>
+        <View
+          style={[
+            styles.status,
+            { backgroundColor: practice.completed ? theme.surface : theme.background },
+          ]}
+        >
           <Ionicons
             name={practice.completed ? 'checkmark-circle' : 'ellipse-outline'}
             size={22}
-            color={practice.completed ? colors.primary : colors.textFaint}
+            color={practice.completed ? theme.primary : theme.textFaint}
           />
-          <Text style={styles.statusLabel}>
+          <Text style={[styles.statusLabel, { color: theme.text }]}>
             {practice.completed ? 'Completed today' : 'Not completed yet'}
           </Text>
         </View>
       </Card>
 
       <View style={styles.field}>
-        <Text style={styles.fieldLabel}>Date</Text>
-        <View style={styles.input}>
-          <Ionicons name="calendar-outline" size={18} color={colors.textMuted} />
-          <Text style={styles.inputText}>{formatLongDate(new Date())}</Text>
+        <Text style={[styles.fieldLabel, { color: theme.text }]}>Date</Text>
+        <View style={[styles.input, inputColors]}>
+          <Ionicons name="calendar-outline" size={18} color={theme.textMuted} />
+          <Text style={[styles.inputText, { color: theme.text }]}>{formatLongDate(new Date())}</Text>
         </View>
       </View>
 
       <View style={styles.field}>
-        <Text style={styles.fieldLabel}>Notes (optional)</Text>
+        <Text style={[styles.fieldLabel, { color: theme.text }]}>Notes (optional)</Text>
         <TextInput
-          style={[styles.input, styles.notes]}
+          style={[styles.input, inputColors, styles.notes, { color: theme.text }]}
           placeholder="Add a note…"
-          placeholderTextColor={colors.textFaint}
+          placeholderTextColor={theme.textFaint}
           multiline
           textAlignVertical="top"
         />
@@ -104,8 +115,6 @@ export function PracticeDetailsScreen({ practice, onBack, onEdit }: PracticeDeta
 const styles = StyleSheet.create({
   hero: {
     gap: spacing.lg,
-    backgroundColor: colors.primarySoft,
-    borderColor: colors.primarySoft,
   },
   heroTop: {
     flexDirection: 'row',
@@ -116,7 +125,6 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -126,12 +134,10 @@ const styles = StyleSheet.create({
   name: {
     fontSize: fontSize.heading,
     fontWeight: '700',
-    color: colors.text,
   },
   description: {
     fontSize: fontSize.body,
     lineHeight: 22,
-    color: colors.textMuted,
   },
   countBlock: {
     gap: spacing.sm,
@@ -142,12 +148,10 @@ const styles = StyleSheet.create({
   },
   countLabel: {
     fontSize: fontSize.small,
-    color: colors.textMuted,
   },
   countValue: {
     fontSize: fontSize.small,
     fontWeight: '700',
-    color: colors.primary,
   },
   status: {
     flexDirection: 'row',
@@ -155,15 +159,10 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     padding: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: colors.surface,
-  },
-  statusPending: {
-    backgroundColor: colors.background,
   },
   statusLabel: {
     fontSize: fontSize.body,
     fontWeight: '600',
-    color: colors.text,
   },
   field: {
     gap: spacing.sm,
@@ -171,7 +170,6 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: fontSize.body,
     fontWeight: '600',
-    color: colors.text,
   },
   input: {
     flexDirection: 'row',
@@ -181,18 +179,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
   },
   inputText: {
     fontSize: fontSize.body,
-    color: colors.text,
   },
   notes: {
     minHeight: 110,
     paddingTop: spacing.md,
     fontSize: fontSize.body,
-    color: colors.text,
   },
   actions: {
     gap: spacing.md,

@@ -58,7 +58,8 @@ src/
   components/        Reusable UI: Card, Badge, Button, Checkbox, ProgressBar/Ring, tab bar…
   screens/           One file per screen
   data/mockData.ts   Static sample practices, hadith, Arabic word and history
-  theme/             Colours, spacing, radius and font sizes
+  constants/theme.ts Light and dark colours, spacing, radius and font sizes
+  hooks/use-theme.ts Picks the light or dark colours from the phone's setting
   types/             Shared TypeScript types (Practice, Hadith, ArabicWord…)
   utils/             Date formatting and practice helpers
 ```
