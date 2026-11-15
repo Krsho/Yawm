@@ -6,8 +6,9 @@ import { PracticeRow } from '../components/PracticeRow';
 import { ProgressBar, ProgressRing } from '../components/Progress';
 import { SectionHeader } from '../components/SectionHeader';
 import { Screen } from '../components/Screen';
+import { fonts, fontSize, spacing } from '../constants/theme';
 import { mockUser, practices, wordOfTheDay } from '../data/mockData';
-import { colors, fonts, fontSize, spacing } from '../theme';
+import { useTheme } from '../hooks/use-theme';
 import { formatLongDate } from '../utils/date';
 import { countCompleted } from '../utils/practice';
 
@@ -27,6 +28,7 @@ export function TodayScreen({
   onViewAllPractices,
   onOpenKnowledge,
 }: TodayScreenProps) {
+  const theme = useTheme();
   const completed = countCompleted(practices);
   const total = practices.length;
   const progress = completed / total;
@@ -36,30 +38,36 @@ export function TodayScreen({
     <Screen>
       <View style={styles.brandRow}>
         <View>
-          <Text style={styles.brand}>Yawm</Text>
-          <Text style={styles.tagline}>Your Daily Muslim Tracker</Text>
+          <Text style={[styles.brand, { color: theme.primary }]}>Yawm</Text>
+          <Text style={[styles.tagline, { color: theme.textMuted }]}>Your Daily Muslim Tracker</Text>
         </View>
-        <Pressable onPress={onOpenSettings} hitSlop={10} style={styles.settingsButton}>
-          <Ionicons name="settings-outline" size={22} color={colors.text} />
+        <Pressable
+          onPress={onOpenSettings}
+          hitSlop={10}
+          style={[styles.settingsButton, { backgroundColor: theme.surface, borderColor: theme.border }]}
+        >
+          <Ionicons name="settings-outline" size={22} color={theme.text} />
         </Pressable>
       </View>
 
       <View>
-        <Text style={styles.greeting}>Assalamu Alaikum, {mockUser.name}</Text>
+        <Text style={[styles.greeting, { color: theme.text }]}>Assalamu Alaikum, {mockUser.name}</Text>
         <View style={styles.dateRow}>
-          <Ionicons name="calendar-outline" size={14} color={colors.textMuted} />
-          <Text style={styles.date}>{formatLongDate(new Date())}</Text>
+          <Ionicons name="calendar-outline" size={14} color={theme.textMuted} />
+          <Text style={[styles.date, { color: theme.textMuted }]}>{formatLongDate(new Date())}</Text>
         </View>
       </View>
 
       <Card style={styles.progressCard}>
         <View style={styles.ringWrapper}>
           <ProgressRing value={progress} />
-          <Text style={styles.ringLabel}>{Math.round(progress * 100)}%</Text>
+          <Text style={[styles.ringLabel, { color: theme.primary }]}>
+            {Math.round(progress * 100)}%
+          </Text>
         </View>
         <View style={styles.progressBody}>
-          <Text style={styles.progressTitle}>{"Today's Progress"}</Text>
-          <Text style={styles.progressSubtitle}>
+          <Text style={[styles.progressTitle, { color: theme.text }]}>{"Today's Progress"}</Text>
+          <Text style={[styles.progressSubtitle, { color: theme.textMuted }]}>
             {completed} of {total} completed
           </Text>
           <ProgressBar value={progress} />
@@ -87,19 +95,21 @@ export function TodayScreen({
 
       <Card tone="beige">
         <View style={styles.knowledgeHeader}>
-          <Text style={styles.knowledgeTitle}>Knowledge of the Day</Text>
-          <Ionicons name="book-outline" size={18} color={colors.gold} />
+          <Text style={[styles.knowledgeTitle, { color: theme.text }]}>Knowledge of the Day</Text>
+          <Ionicons name="book-outline" size={18} color={theme.accent} />
         </View>
         <View style={styles.wordRow}>
-          <Text style={styles.arabicWord}>{wordOfTheDay.arabic}</Text>
+          <Text style={[styles.arabicWord, { color: theme.primary }]}>{wordOfTheDay.arabic}</Text>
           <View>
-            <Text style={styles.transliteration}>{wordOfTheDay.transliteration}</Text>
-            <Text style={styles.meaning}>{wordOfTheDay.meaning}</Text>
+            <Text style={[styles.transliteration, { color: theme.text }]}>
+              {wordOfTheDay.transliteration}
+            </Text>
+            <Text style={[styles.meaning, { color: theme.textMuted }]}>{wordOfTheDay.meaning}</Text>
           </View>
         </View>
         <Pressable onPress={onOpenKnowledge} style={styles.readMore} hitSlop={8}>
-          <Text style={styles.readMoreLabel}>Read more</Text>
-          <Ionicons name="arrow-forward" size={15} color={colors.primary} />
+          <Text style={[styles.readMoreLabel, { color: theme.primary }]}>Read more</Text>
+          <Ionicons name="arrow-forward" size={15} color={theme.primary} />
         </Pressable>
       </Card>
     </Screen>
@@ -116,23 +126,18 @@ const styles = StyleSheet.create({
     fontFamily: fonts.serif,
     fontSize: fontSize.display,
     fontWeight: '700',
-    color: colors.primary,
   },
   tagline: {
     fontSize: fontSize.small,
-    color: colors.textMuted,
   },
   settingsButton: {
     padding: spacing.sm,
     borderRadius: 20,
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.border,
   },
   greeting: {
     fontSize: fontSize.title + 2,
     fontWeight: '700',
-    color: colors.text,
   },
   dateRow: {
     flexDirection: 'row',
@@ -142,7 +147,6 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: fontSize.small,
-    color: colors.textMuted,
   },
   progressCard: {
     flexDirection: 'row',
@@ -157,7 +161,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     fontSize: fontSize.caption,
     fontWeight: '700',
-    color: colors.primary,
   },
   progressBody: {
     flex: 1,
@@ -166,11 +169,9 @@ const styles = StyleSheet.create({
   progressTitle: {
     fontSize: fontSize.body,
     fontWeight: '700',
-    color: colors.text,
   },
   progressSubtitle: {
     fontSize: fontSize.small,
-    color: colors.textMuted,
     marginBottom: spacing.xs,
   },
   listCard: {
@@ -184,7 +185,6 @@ const styles = StyleSheet.create({
   knowledgeTitle: {
     fontSize: fontSize.body,
     fontWeight: '700',
-    color: colors.text,
   },
   wordRow: {
     flexDirection: 'row',
@@ -194,17 +194,14 @@ const styles = StyleSheet.create({
   },
   arabicWord: {
     fontSize: 38,
-    color: colors.primary,
     writingDirection: 'rtl',
   },
   transliteration: {
     fontSize: fontSize.body,
     fontWeight: '600',
-    color: colors.text,
   },
   meaning: {
     fontSize: fontSize.small,
-    color: colors.textMuted,
   },
   readMore: {
     flexDirection: 'row',
@@ -215,6 +212,5 @@ const styles = StyleSheet.create({
   readMoreLabel: {
     fontSize: fontSize.small,
     fontWeight: '600',
-    color: colors.primary,
   },
 });

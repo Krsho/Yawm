@@ -6,8 +6,9 @@ import { Card } from '../components/Card';
 import { PracticeRow } from '../components/PracticeRow';
 import { SectionHeader } from '../components/SectionHeader';
 import { Screen } from '../components/Screen';
+import { fontSize, radius, spacing } from '../constants/theme';
 import { practices } from '../data/mockData';
-import { colors, fontSize, radius, spacing } from '../theme';
+import { useTheme } from '../hooks/use-theme';
 import { Practice } from '../types';
 import { formatLongDate } from '../utils/date';
 
@@ -40,28 +41,48 @@ interface PracticesScreenProps {
 }
 
 export function PracticesScreen({ onOpenPractice, onAddPractice }: PracticesScreenProps) {
+  const theme = useTheme();
+
   return (
     <Screen>
       <View style={styles.headerRow}>
         <View>
-          <Text style={styles.title}>Daily Practices</Text>
+          <Text style={[styles.title, { color: theme.text }]}>Daily Practices</Text>
           <View style={styles.dateRow}>
-            <Ionicons name="calendar-outline" size={14} color={colors.textMuted} />
-            <Text style={styles.date}>{formatLongDate(new Date())}</Text>
+            <Ionicons name="calendar-outline" size={14} color={theme.textMuted} />
+            <Text style={[styles.date, { color: theme.textMuted }]}>{formatLongDate(new Date())}</Text>
           </View>
         </View>
-        <Pressable onPress={onAddPractice} style={styles.addButton} hitSlop={6}>
-          <Ionicons name="add" size={26} color={colors.white} />
+        <Pressable
+          onPress={onAddPractice}
+          style={[styles.addButton, { backgroundColor: theme.primary }]}
+          hitSlop={6}
+        >
+          <Ionicons name="add" size={26} color={theme.onPrimary} />
         </Pressable>
       </View>
 
       {/* Filter chips are static for now; "All" is shown as selected. */}
       <View style={styles.filters}>
-        {FILTERS.map((filter, index) => (
-          <View key={filter} style={[styles.chip, index === 0 && styles.chipActive]}>
-            <Text style={[styles.chipLabel, index === 0 && styles.chipLabelActive]}>{filter}</Text>
-          </View>
-        ))}
+        {FILTERS.map((filter, index) => {
+          const isActive = index === 0;
+          return (
+            <View
+              key={filter}
+              style={[
+                styles.chip,
+                {
+                  backgroundColor: isActive ? theme.primary : theme.surface,
+                  borderColor: isActive ? theme.primary : theme.border,
+                },
+              ]}
+            >
+              <Text style={[styles.chipLabel, { color: isActive ? theme.onPrimary : theme.text }]}>
+                {filter}
+              </Text>
+            </View>
+          );
+        })}
       </View>
 
       {SECTIONS.map((section) => (
@@ -95,7 +116,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: fontSize.heading,
     fontWeight: '700',
-    color: colors.text,
   },
   dateRow: {
     flexDirection: 'row',
@@ -105,13 +125,11 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: fontSize.small,
-    color: colors.textMuted,
   },
   addButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -124,21 +142,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing.sm + 2,
     borderRadius: radius.md,
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.border,
-  },
-  chipActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
   },
   chipLabel: {
     fontSize: fontSize.small,
     fontWeight: '600',
-    color: colors.text,
-  },
-  chipLabelActive: {
-    color: colors.white,
   },
   listCard: {
     paddingVertical: spacing.xs,

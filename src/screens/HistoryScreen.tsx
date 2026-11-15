@@ -5,8 +5,9 @@ import { Card } from '../components/Card';
 import { ProgressBar } from '../components/Progress';
 import { SectionHeader } from '../components/SectionHeader';
 import { Screen } from '../components/Screen';
+import { fontSize, spacing } from '../constants/theme';
 import { previousDays } from '../data/mockData';
-import { colors, fontSize, spacing } from '../theme';
+import { useTheme } from '../hooks/use-theme';
 import { formatDayLabel, formatShortDate, getWeekDays, shortWeekday } from '../utils/date';
 
 type DayStatus = 'done' | 'today' | 'upcoming';
@@ -17,6 +18,7 @@ function dayStatus(day: Date, today: Date): DayStatus {
 }
 
 export function HistoryScreen() {
+  const theme = useTheme();
   const today = new Date();
   const week = getWeekDays(today);
   // Sample weekly numbers until real records are stored on the device.
@@ -26,15 +28,21 @@ export function HistoryScreen() {
   return (
     <Screen>
       <View>
-        <Text style={styles.title}>Your History</Text>
-        <Text style={styles.subtitle}>Consistency is better than intensity</Text>
+        <Text style={[styles.title, { color: theme.text }]}>Your History</Text>
+        <Text style={[styles.subtitle, { color: theme.textMuted }]}>
+          Consistency is better than intensity
+        </Text>
       </View>
 
       <Card style={styles.weekCard}>
-        <Text style={styles.cardTitle}>This Week</Text>
+        <Text style={[styles.cardTitle, { color: theme.text }]}>This Week</Text>
         <View style={styles.weekSummary}>
-          <Text style={styles.weekCount}>{weekCompleted} practices completed</Text>
-          <Text style={styles.weekPercent}>{Math.round((weekCompleted / weekTotal) * 100)}%</Text>
+          <Text style={[styles.weekCount, { color: theme.textMuted }]}>
+            {weekCompleted} practices completed
+          </Text>
+          <Text style={[styles.weekPercent, { color: theme.primary }]}>
+            {Math.round((weekCompleted / weekTotal) * 100)}%
+          </Text>
         </View>
         <ProgressBar value={weekCompleted / weekTotal} />
 
@@ -43,18 +51,28 @@ export function HistoryScreen() {
             const status = dayStatus(day, today);
             return (
               <View key={day.toDateString()} style={styles.day}>
-                <Text style={[styles.dayLabel, status === 'today' && styles.dayLabelToday]}>
+                <Text
+                  style={[
+                    styles.dayLabel,
+                    { color: status === 'today' ? theme.primary : theme.textMuted },
+                    status === 'today' && styles.dayLabelToday,
+                  ]}
+                >
                   {shortWeekday(day)}
                 </Text>
                 <View
                   style={[
                     styles.dayDot,
-                    status === 'done' && styles.dayDotDone,
-                    status === 'today' && styles.dayDotToday,
+                    { borderColor: status === 'upcoming' ? theme.border : theme.primary },
+                    status === 'done' && { backgroundColor: theme.primary },
                   ]}
                 >
-                  {status === 'done' && <Ionicons name="checkmark" size={16} color={colors.white} />}
-                  {status === 'today' && <View style={styles.todayInner} />}
+                  {status === 'done' && (
+                    <Ionicons name="checkmark" size={16} color={theme.onPrimary} />
+                  )}
+                  {status === 'today' && (
+                    <View style={[styles.todayInner, { backgroundColor: theme.primaryMuted }]} />
+                  )}
                 </View>
               </View>
             );
@@ -68,16 +86,24 @@ export function HistoryScreen() {
           {previousDays.map((record, index) => (
             <View
               key={record.date.toDateString()}
-              style={[styles.dayRow, index < previousDays.length - 1 && styles.divider]}
+              style={[
+                styles.dayRow,
+                { borderBottomColor: theme.border },
+                index < previousDays.length - 1 && styles.divider,
+              ]}
             >
               <View style={styles.dayRowText}>
-                <Text style={styles.dayRowTitle}>{formatDayLabel(record.date, today)}</Text>
-                <Text style={styles.dayRowDate}>{formatShortDate(record.date)}</Text>
+                <Text style={[styles.dayRowTitle, { color: theme.text }]}>
+                  {formatDayLabel(record.date, today)}
+                </Text>
+                <Text style={[styles.dayRowDate, { color: theme.textMuted }]}>
+                  {formatShortDate(record.date)}
+                </Text>
               </View>
-              <Text style={styles.dayRowCount}>
+              <Text style={[styles.dayRowCount, { color: theme.textMuted }]}>
                 {record.completed} of {record.total} completed
               </Text>
-              <Ionicons name="chevron-forward" size={16} color={colors.textFaint} />
+              <Ionicons name="chevron-forward" size={16} color={theme.textFaint} />
             </View>
           ))}
         </Card>
@@ -90,12 +116,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: fontSize.heading,
     fontWeight: '700',
-    color: colors.text,
   },
   subtitle: {
     marginTop: spacing.xs,
     fontSize: fontSize.small,
-    color: colors.textMuted,
   },
   weekCard: {
     gap: spacing.sm,
@@ -103,7 +127,6 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: fontSize.title,
     fontWeight: '700',
-    color: colors.text,
   },
   weekSummary: {
     flexDirection: 'row',
@@ -111,12 +134,10 @@ const styles = StyleSheet.create({
   },
   weekCount: {
     fontSize: fontSize.small,
-    color: colors.textMuted,
   },
   weekPercent: {
     fontSize: fontSize.small,
     fontWeight: '700',
-    color: colors.primary,
   },
   days: {
     flexDirection: 'row',
@@ -129,10 +150,8 @@ const styles = StyleSheet.create({
   },
   dayLabel: {
     fontSize: fontSize.caption,
-    color: colors.textMuted,
   },
   dayLabelToday: {
-    color: colors.primary,
     fontWeight: '700',
   },
   dayDot: {
@@ -140,22 +159,13 @@ const styles = StyleSheet.create({
     height: 30,
     borderRadius: 15,
     borderWidth: 1.5,
-    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  dayDotDone: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  dayDotToday: {
-    borderColor: colors.primary,
   },
   todayInner: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: colors.sage,
   },
   listCard: {
     paddingVertical: spacing.xs,
@@ -168,7 +178,6 @@ const styles = StyleSheet.create({
   },
   divider: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
   },
   dayRowText: {
     flex: 1,
@@ -177,14 +186,11 @@ const styles = StyleSheet.create({
   dayRowTitle: {
     fontSize: fontSize.body,
     fontWeight: '500',
-    color: colors.text,
   },
   dayRowDate: {
     fontSize: fontSize.caption,
-    color: colors.textMuted,
   },
   dayRowCount: {
     fontSize: fontSize.small,
-    color: colors.textMuted,
   },
 });
