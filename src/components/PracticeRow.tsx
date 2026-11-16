@@ -13,6 +13,7 @@ interface PracticeRowProps {
   variant?: 'dashboard' | 'list';
   showDivider?: boolean;
   onPress?: () => void;
+  onLongPress?: () => void;
 }
 
 export function PracticeRow({
@@ -20,15 +21,30 @@ export function PracticeRow({
   variant = 'list',
   showDivider = false,
   onPress,
+  onLongPress,
 }: PracticeRowProps) {
   const theme = useTheme();
   const isDashboard = variant === 'dashboard';
   // Completed practices are greyed out in lists, but not on the dashboard.
   const nameColor = practice.completed && !isDashboard ? theme.textMuted : theme.text;
+  // What a screen reader says for the whole row, instead of reading each text separately.
+  const accessibilityLabel = [
+    practice.name,
+    practice.type,
+    practice.completed ? 'completed' : 'not completed',
+    practiceMeta(practice),
+  ]
+    .filter(Boolean)
+    .join(', ');
 
   return (
     <Pressable
       onPress={onPress}
+      onLongPress={onLongPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={onLongPress ? 'Long press to delete' : undefined}
+      android_ripple={{ color: theme.border }}
       style={({ pressed }) => [
         styles.row,
         { borderBottomColor: theme.border },
