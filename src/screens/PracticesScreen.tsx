@@ -1,39 +1,43 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  SectionList,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge } from '../components/Badge';
-import { Card } from '../components/Card';
+import { Button } from '../components/Button';
+import { EmptyState } from '../components/EmptyState';
+import { FilterChip } from '../components/FilterChip';
 import { PracticeRow } from '../components/PracticeRow';
 import { SectionHeader } from '../components/SectionHeader';
-import { Screen } from '../components/Screen';
 import { SummaryRow } from '../components/SummaryRow';
 import { fontSize, radius, spacing } from '../constants/theme';
-import { practices } from '../data/mockData';
+import { fetchPractices } from '../data/api';
 import { useTheme } from '../hooks/use-theme';
-import { Practice } from '../types';
+import { Practice, PracticeType } from '../types';
 import { formatLongDate } from '../utils/date';
+import { groupPractices } from '../utils/practice';
 
-const FILTERS = ['All', 'Obligatory', 'Voluntary'];
+type Filter = 'all' | PracticeType;
+type Sort = 'default' | 'name' | 'todo';
 
-const SECTIONS: { title: string; badge: string; tone: 'green' | 'beige'; items: Practice[] }[] = [
-  {
-    title: 'Obligatory Prayers',
-    badge: 'Fard',
-    tone: 'green',
-    items: practices.filter((p) => p.type === 'obligatory'),
-  },
-  {
-    title: 'Sunnah Prayers',
-    badge: 'Voluntary',
-    tone: 'beige',
-    items: practices.filter((p) => p.type === 'voluntary' && p.category === 'prayer'),
-  },
-  {
-    title: 'Daily Worship',
-    badge: 'Voluntary',
-    tone: 'beige',
-    items: practices.filter((p) => p.type === 'voluntary' && p.category !== 'prayer'),
-  },
+const FILTERS: { value: Filter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'obligatory', label: 'Obligatory' },
+  { value: 'voluntary', label: 'Voluntary' },
+];
+
+const SORTS: { value: Sort; label: string }[] = [
+  { value: 'default', label: 'Default' },
+  { value: 'name', label: 'A–Z' },
+  { value: 'todo', label: 'To do first' },
 ];
 
 interface PracticesScreenProps {
@@ -43,9 +47,87 @@ interface PracticesScreenProps {
 
 export function PracticesScreen({ onOpenPractice, onAddPractice }: PracticesScreenProps) {
   const theme = useTheme();
+  const [practices, setPractices] = useState<Practice[]>([]);
+  const [status, setStatus] = useState<'loading' | 'error' | 'ready'>('loading');
+  const [attempt, setAttempt] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const [filter, setFilter] = useState<Filter>('all');
+  const [sort, setSort] = useState<Sort>('default');
 
-  return (
-    <Screen>
+  // Load the practices when the screen opens, and again after "Try again".
+  useEffect(() => {
+    let ignore = false;
+    fetchPractices()
+      .then((data) => {
+        if (!ignore) {
+          setPractices(data);
+          setStatus('ready');
+        }
+      })
+      .catch(() => {
+        if (!ignore) setStatus('error');
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [attempt]);
+
+  function retry() {
+    setStatus('loading');
+    setAttempt((a) => a + 1);
+  }
+
+  // Pull-to-refresh: the old list stays visible under the spinner.
+  async function refresh() {
+    setRefreshing(true);
+    try {
+      setPractices(await fetchPractices());
+    } catch {
+      // Keep the old list if the refresh fails.
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
+  function confirmDelete(practice: Practice) {
+    Alert.alert('Delete practice?', `"${practice.name}" will be removed.`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => setPractices((list) => list.filter((p) => p.id !== practice.id)),
+      },
+    ]);
+  }
+
+  // Derived values: calculated during render from state, never stored in state.
+  const visible = filter === 'all' ? practices : practices.filter((p) => p.type === filter);
+  let sorted = visible;
+  if (sort === 'name') sorted = [...visible].sort((a, b) => a.name.localeCompare(b.name));
+  if (sort === 'todo') sorted = [...visible].sort((a, b) => Number(a.completed) - Number(b.completed));
+  const sections = groupPractices(sorted);
+
+  if (status !== 'ready') {
+    return (
+      <SafeAreaView
+        style={[styles.safeArea, { backgroundColor: theme.background }]}
+        edges={['top', 'left', 'right']}
+      >
+        {status === 'loading' ? (
+          <ActivityIndicator style={styles.loading} size="large" color={theme.primary} />
+        ) : (
+          <EmptyState title="Could not load practices" message="Check your connection and try again.">
+            <View style={styles.retryRow}>
+              <Button label="Try again" onPress={retry} />
+            </View>
+          </EmptyState>
+        )}
+      </SafeAreaView>
+    );
+  }
+
+  const listHeader = (
+    <View style={styles.listHeader}>
       <View style={styles.headerRow}>
         <View>
           <Text style={[styles.title, { color: theme.text }]}>Daily Practices</Text>
@@ -56,6 +138,8 @@ export function PracticesScreen({ onOpenPractice, onAddPractice }: PracticesScre
         </View>
         <Pressable
           onPress={onAddPractice}
+          accessibilityRole="button"
+          accessibilityLabel="Add practice"
           style={[styles.addButton, { backgroundColor: theme.primary }]}
           hitSlop={6}
         >
@@ -65,52 +149,109 @@ export function PracticesScreen({ onOpenPractice, onAddPractice }: PracticesScre
 
       <SummaryRow practices={practices} />
 
-      {/* Filter chips are static for now; "All" is shown as selected. */}
-      <View style={styles.filters}>
-        {FILTERS.map((filter, index) => {
-          const isActive = index === 0;
+      <View style={styles.chipGroups}>
+        <View style={styles.chips}>
+          {FILTERS.map((option) => (
+            <FilterChip
+              key={option.value}
+              label={option.label}
+              selected={filter === option.value}
+              onPress={() => setFilter(option.value)}
+            />
+          ))}
+        </View>
+        <View style={styles.chips}>
+          {SORTS.map((option) => (
+            <FilterChip
+              key={option.value}
+              label={option.label}
+              selected={sort === option.value}
+              onPress={() => setSort(option.value)}
+            />
+          ))}
+        </View>
+      </View>
+    </View>
+  );
+
+  return (
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: theme.background }]}
+      edges={['top', 'left', 'right']}
+    >
+      <SectionList
+        sections={sections}
+        keyExtractor={(practice) => practice.id}
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={
+          <EmptyState
+            title={filter === 'all' ? 'No practices yet' : `No ${filter} practices`}
+            message={filter === 'all' ? 'Tap + to add your first practice.' : 'Choose another filter.'}
+          />
+        }
+        renderSectionHeader={({ section }) => (
+          <View style={styles.sectionHeader}>
+            <SectionHeader
+              title={section.title}
+              accessory={<Badge label={section.badge} tone={section.tone} />}
+            />
+          </View>
+        )}
+        renderItem={({ item, index, section }) => {
+          const isLast = index === section.data.length - 1;
+          // Each row draws its part of the card: the first row the top, the last row the bottom.
           return (
             <View
-              key={filter}
               style={[
-                styles.chip,
-                {
-                  backgroundColor: isActive ? theme.primary : theme.surface,
-                  borderColor: isActive ? theme.primary : theme.border,
-                },
+                styles.rowCard,
+                { backgroundColor: theme.surface, borderColor: theme.border },
+                index === 0 && styles.firstRow,
+                isLast && styles.lastRow,
               ]}
             >
-              <Text style={[styles.chipLabel, { color: isActive ? theme.onPrimary : theme.text }]}>
-                {filter}
-              </Text>
+              <PracticeRow
+                practice={item}
+                showDivider={!isLast}
+                onPress={() => onOpenPractice(item.id)}
+                onLongPress={() => confirmDelete(item)}
+              />
             </View>
           );
-        })}
-      </View>
-
-      {SECTIONS.map((section) => (
-        <View key={section.title}>
-          <SectionHeader
-            title={section.title}
-            accessory={<Badge label={section.badge} tone={section.tone} />}
-          />
-          <Card style={styles.listCard}>
-            {section.items.map((practice, index) => (
-              <PracticeRow
-                key={practice.id}
-                practice={practice}
-                showDivider={index < section.items.length - 1}
-                onPress={() => onOpenPractice(practice.id)}
-              />
-            ))}
-          </Card>
-        </View>
-      ))}
-    </Screen>
+        }}
+        stickySectionHeadersEnabled={false}
+        refreshing={refreshing}
+        onRefresh={refresh}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  loading: {
+    flex: 1,
+  },
+  retryRow: {
+    flexDirection: 'row',
+    width: 200,
+    marginTop: spacing.md,
+  },
+  content: {
+    flexGrow: 1,
+    width: '100%',
+    maxWidth: 600,
+    alignSelf: 'center',
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xxl,
+  },
+  listHeader: {
+    gap: spacing.xl,
+  },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -136,22 +277,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  filters: {
+  chipGroups: {
+    gap: spacing.sm,
+  },
+  chips: {
     flexDirection: 'row',
     gap: spacing.sm,
   },
-  chip: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: spacing.sm + 2,
-    borderRadius: radius.md,
-    borderWidth: 1,
+  sectionHeader: {
+    paddingTop: spacing.xl,
   },
-  chipLabel: {
-    fontSize: fontSize.small,
-    fontWeight: '600',
+  rowCard: {
+    paddingHorizontal: spacing.lg,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
   },
-  listCard: {
-    paddingVertical: spacing.xs,
+  firstRow: {
+    borderTopWidth: 1,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    paddingTop: spacing.xs,
+  },
+  lastRow: {
+    borderBottomWidth: 1,
+    borderBottomLeftRadius: radius.lg,
+    borderBottomRightRadius: radius.lg,
+    paddingBottom: spacing.xs,
   },
 });
