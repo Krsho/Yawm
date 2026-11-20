@@ -43,7 +43,7 @@ export function PracticeRow({
       onLongPress={onLongPress}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
-      accessibilityHint={onLongPress ? 'Long press to delete' : undefined}
+      accessibilityHint={onLongPress ? 'Opens the practice. Long press to delete.' : undefined}
       android_ripple={{ color: theme.border }}
       style={({ pressed }) => [
         styles.row,

@@ -26,7 +26,7 @@ the Cross-Platform Development course.
 - [x] Static versions of all seven screens with sample data
 - [x] StyleSheet theme with light and dark mode, responsive layout and safe areas
 - [x] Practice list with `SectionList`, filters, sorting, empty, loading and error states
-- [ ] Expo Router navigation with a dynamic practice detail route
+- [x] Expo Router navigation with a dynamic practice detail route
 - [ ] Tabs and an Add / Edit Practice modal
 - [ ] Create and edit forms with validation
 - [ ] Global state for practices and settings
@@ -57,6 +57,7 @@ src/
   app/               Expo Router routes: every file is a screen with its own address
     _layout.tsx      Root Stack that holds all screens
     index.tsx        Home (/): switches between the tab screens (temporary, until Week 8 tabs)
+    practice/[id].tsx  Practice details (/practice/fajr, ...), a dynamic route
   components/        Reusable UI: Card, Badge, Button, Checkbox, ProgressBar/Ring, tab bar…
   screens/           One file per screen
   data/mockData.ts   Static sample practices, hadith, Arabic word and history
@@ -79,6 +80,9 @@ src/
   filter and sort chips as its header. The practices come from a fake API with loading,
   error (Try again) and empty states and pull-to-refresh; a long press deletes a practice
   after a confirmation, and rows and chips are described for screen readers.
+- **Week 7** — Switched to Expo Router. The practice details are a dynamic route,
+  `/practice/[id]`, opened from the Practices list and the Today screen with
+  `router.push`; an unknown id shows a "Practice not found" message.
 
 ## Screenshots
 

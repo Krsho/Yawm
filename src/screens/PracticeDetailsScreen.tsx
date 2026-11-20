@@ -24,7 +24,8 @@ const CATEGORY_ICONS: Record<PracticeCategory, ComponentProps<typeof MaterialCom
 interface PracticeDetailsScreenProps {
   practice: Practice;
   onBack: () => void;
-  onEdit: () => void;
+  /** Not connected yet: the edit form comes back as a modal in a later week. */
+  onEdit?: () => void;
 }
 
 export function PracticeDetailsScreen({ practice, onBack, onEdit }: PracticeDetailsScreenProps) {

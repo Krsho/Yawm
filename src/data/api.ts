@@ -9,3 +9,8 @@ export async function fetchPractices(options: { fail?: boolean } = {}): Promise<
   if (options.fail) throw new Error('Could not load practices');
   return practices;
 }
+
+/** Finds one practice by its id, or returns undefined if there is none. */
+export function getPractice(id: string): Practice | undefined {
+  return practices.find((practice) => practice.id === id);
+}

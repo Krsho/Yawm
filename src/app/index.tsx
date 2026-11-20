@@ -1,20 +1,18 @@
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { BottomTabBar, TabName } from '@/components/BottomTabBar';
-import { practices } from '@/data/mockData';
 import { useTheme } from '@/hooks/use-theme';
 import { AddPracticeScreen } from '@/screens/AddPracticeScreen';
 import { HistoryScreen } from '@/screens/HistoryScreen';
 import { KnowledgeScreen } from '@/screens/KnowledgeScreen';
-import { PracticeDetailsScreen } from '@/screens/PracticeDetailsScreen';
 import { PracticesScreen } from '@/screens/PracticesScreen';
 import { SettingsScreen } from '@/screens/SettingsScreen';
 import { TodayScreen } from '@/screens/TodayScreen';
 
 // Screens that open on top of a tab (not part of the bottom tab bar).
 type Overlay =
-  | { name: 'practice'; practiceId: string }
   | { name: 'addPractice' }
   | { name: 'settings' }
   | null;
@@ -27,26 +25,18 @@ export default function HomeScreen() {
   const [tab, setTab] = useState<TabName>('today');
   const [overlay, setOverlay] = useState<Overlay>(null);
   const theme = useTheme();
+  const router = useRouter();
 
   const goToTab = (next: TabName) => {
     setOverlay(null);
     setTab(next);
   };
-  const openPractice = (practiceId: string) => setOverlay({ name: 'practice', practiceId });
+  // The details are a route of their own: push opens them on top of this screen.
+  const openPractice = (practiceId: string) => router.push(`/practice/${practiceId}`);
   const closeOverlay = () => setOverlay(null);
 
   const renderOverlay = () => {
     switch (overlay?.name) {
-      case 'practice': {
-        const practice = practices.find((p) => p.id === overlay.practiceId) ?? practices[0];
-        return (
-          <PracticeDetailsScreen
-            practice={practice}
-            onBack={closeOverlay}
-            onEdit={() => setOverlay({ name: 'addPractice' })}
-          />
-        );
-      }
       case 'addPractice':
         return <AddPracticeScreen onClose={closeOverlay} />;
       case 'settings':
