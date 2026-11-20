@@ -53,8 +53,10 @@ The phone and computer must be on the same Wi-Fi network; otherwise run
 ## Project structure
 
 ```
-App.tsx              Root component; switches between screens (temporary, until Expo Router)
 src/
+  app/               Expo Router routes: every file is a screen with its own address
+    _layout.tsx      Root Stack that holds all screens
+    index.tsx        Home (/): switches between the tab screens (temporary, until Week 8 tabs)
   components/        Reusable UI: Card, Badge, Button, Checkbox, ProgressBar/Ring, tab bar…
   screens/           One file per screen
   data/mockData.ts   Static sample practices, hadith, Arabic word and history

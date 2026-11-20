@@ -1,18 +1,16 @@
-import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { BottomTabBar, TabName } from './src/components/BottomTabBar';
-import { practices } from './src/data/mockData';
-import { useTheme } from './src/hooks/use-theme';
-import { AddPracticeScreen } from './src/screens/AddPracticeScreen';
-import { HistoryScreen } from './src/screens/HistoryScreen';
-import { KnowledgeScreen } from './src/screens/KnowledgeScreen';
-import { PracticeDetailsScreen } from './src/screens/PracticeDetailsScreen';
-import { PracticesScreen } from './src/screens/PracticesScreen';
-import { SettingsScreen } from './src/screens/SettingsScreen';
-import { TodayScreen } from './src/screens/TodayScreen';
+import { BottomTabBar, TabName } from '@/components/BottomTabBar';
+import { practices } from '@/data/mockData';
+import { useTheme } from '@/hooks/use-theme';
+import { AddPracticeScreen } from '@/screens/AddPracticeScreen';
+import { HistoryScreen } from '@/screens/HistoryScreen';
+import { KnowledgeScreen } from '@/screens/KnowledgeScreen';
+import { PracticeDetailsScreen } from '@/screens/PracticeDetailsScreen';
+import { PracticesScreen } from '@/screens/PracticesScreen';
+import { SettingsScreen } from '@/screens/SettingsScreen';
+import { TodayScreen } from '@/screens/TodayScreen';
 
 // Screens that open on top of a tab (not part of the bottom tab bar).
 type Overlay =
@@ -22,10 +20,10 @@ type Overlay =
   | null;
 
 /**
- * Week 4: a simple state-based switcher so every static screen can be
- * previewed in Expo Go. It is replaced by Expo Router (Weeks 7–8).
+ * Home route (/). Until the tabs move to Expo Router in Week 8, it still
+ * switches between the tab screens with state.
  */
-export default function App() {
+export default function HomeScreen() {
   const [tab, setTab] = useState<TabName>('today');
   const [overlay, setOverlay] = useState<Overlay>(null);
   const theme = useTheme();
@@ -86,13 +84,10 @@ export default function App() {
   };
 
   return (
-    <SafeAreaProvider>
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
-        <View style={styles.content}>{overlay ? renderOverlay() : renderTab()}</View>
-        <BottomTabBar active={tab} onSelect={goToTab} />
-      </View>
-      <StatusBar style="auto" />
-    </SafeAreaProvider>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={styles.content}>{overlay ? renderOverlay() : renderTab()}</View>
+      <BottomTabBar active={tab} onSelect={goToTab} />
+    </View>
   );
 }
 
